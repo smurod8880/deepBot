@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: quotex-signalnet
+    runtime: docker
+    port: 8000
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python main.py
+    envVars:
+      - key: BINANCE_API_KEY
+        fromService:
+          type: secret
+          name: binance_api_key
+      - key: BINANCE_API_SECRET
+        fromService:
+          type: secret
+          name: binance_api_secret
+      - key: TELEGRAM_BOT_TOKEN
+        fromService:
+          type: secret
+          name: telegram_bot_token
+      - key: TELEGRAM_CHAT_ID
+        fromService:
+          type: secret
+          name: telegram_chat_id
+      - key: MIN_CONFIDENCE
+        value: "90"
