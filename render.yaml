@@ -3,9 +3,6 @@ services:
     name: quotex-signalnet
     runtime: docker
     port: 8000
-    env: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: python main.py
     envVars:
       - key: BINANCE_API_KEY
         fromService:
@@ -25,3 +22,5 @@ services:
           name: telegram_chat_id
       - key: MIN_CONFIDENCE
         value: "90"
+    buildCommand: chmod +x build.sh && ./build.sh
+    startCommand: python main.py
