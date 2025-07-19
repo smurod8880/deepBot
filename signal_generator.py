@@ -1,9 +1,10 @@
 import asyncio
+import numpy as np
 from data_manager import RealTimeData
 from feature_engineer import FeatureEngineer
 from model_ensemble import HybridModel
 from telegram_bot import send_signal
-from config import ASSETS, TIMEFRAMES, MIN_CONFIDENCE
+from config import ASSETS, TIMEFRAMES, MIN_CONFIDENCE, VOLATILE_PAIRS
 
 class SignalGenerator:
     def __init__(self):
@@ -20,12 +21,19 @@ class SignalGenerator:
         while self.active:
             try:
                 for asset in ASSETS:
-                    for timeframe in TIMEFRAMES:
+                    # Для высоковолатильных пар используем 1m, для остальных 5m
+                    timeframes = ["1m"] if asset in VOLATILE_PAIRS else ["5m"]
+                    
+                    for timeframe in timeframes:
                         df = self.data_manager.get_data(asset, timeframe)
                         if df is None or len(df) < 50:
                             continue
                         
-                        features = self.feature_engineer.calculate_features(df)
+                        # Получаем дополнительные данные
+                        orderbook = self.data_manager.get_orderbook(asset)
+                        ticker = self.data_manager.get_ticker(asset)
+                        
+                        features = self.feature_engineer.calculate_features(df, orderbook, ticker)
                         if not features:
                             continue
                         
@@ -40,7 +48,7 @@ class SignalGenerator:
                             }
                             await send_signal(signal)
                 
-                await asyncio.sleep(10)  # Проверка каждые 10 секунд
+                await asyncio.sleep(3)  # Проверка каждые 3 секунды
             
             except Exception as e:
                 print(f"Signal generation error: {str(e)}")
