@@ -1,19 +1,19 @@
 FROM python:3.11-slim
 
-# Установка системных зависимостей с добавлением automake и libtool
+# Установка системных зависимостей
 RUN apt-get update && apt-get install -y \
     build-essential \
     libgomp1 \
     wget \
-    automake \    # Добавлено
-    libtool \     # Добавлено
+    automake \
+    libtool \
     && rm -rf /var/lib/apt/lists/*
 
-# Исправленная установка TA-Lib
+# Установка TA-Lib
 RUN wget https://github.com/TA-Lib/ta-lib/archive/refs/tags/v0.4.0.tar.gz && \
     tar -xzvf v0.4.0.tar.gz && \
     cd ta-lib-0.4.0 && \
-    autoreconf -i && \  # Генерация скрипта configure
+    autoreconf -i && \
     ./configure --prefix=/usr && \
     make && \
     make install && \
